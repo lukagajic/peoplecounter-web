@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>People counter</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Passion+One&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Passion+One&family=Paytone+One&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Asap:wght@600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Asap', sans-serif;
+        }
+        body {
+            background: rgb(236,235,249);
+            background: linear-gradient(90deg, rgba(236,235,249,1) 0%, rgba(206,233,238,1) 100%);
+        }
+        header {
+            background: rgb(2,0,36);
+            background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 49%, rgba(0,212,255,1) 100%);
+            color: white;
+            padding: 10px;
+        }
+        header > h1 {
+            text-align: center;
+        }
+        #content {
+            max-width: 900px;
+            margin: 10px auto;
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            border-radius: 15px;
+            background: rgb(243,243,249);
+            background: linear-gradient(90deg, rgba(243,243,249,1) 0%, rgba(235,245,247,1) 100%);
+            box-shadow: 1px 1px 1px 1px #ccc;
+        }
+        #content > div {
+            margin-left: 10px;
+        }
+        #content h2 {
+            font-size: 27px;
+        }
+        #content p {
+            font-size: 22px;
+        }
+        #content h2, p {
+            margin-bottom: 7px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>People counter</h1>
+    </header>
+    <main>
+        <div id="content">
+            <img src="{{ url_for('video_feed') }}">
+            <div>
+                <h2>Current people count: <span id="diff">0</span></h2>
+                <hr>
+                <p>People entered the building: <strong id="in">0</strong></p>
+                <p>People left the building: <strong id="out">0</strong></p>
+            </div>
+            <div>
+                <button id="btn-reset">Reset counter</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.0/socket.io.js" integrity="sha512-+l9L4lMTFNy3dEglQpprf7jQBhQsQ3/WvOnjaN/+/L4i0jOstgScV0q2TjfvRF4V+ZePMDuZYIQtg5T4MKr+MQ==" crossorigin="anonymous"></script>
+    <script>
+        const socket = io.connect('http://localhost:9000', { transports : ['websocket'] });
+
+        const buttonReset = document.getElementById("btn-reset");
+
+        buttonReset.addEventListener('click', (e) => {
+            socket.emit('reset', JSON.stringify({
+                in: 0,
+                out: 0,
+                diff: 0
+            }));
+        });
+        
+        socket.on('connect', () => {
+            console.log('Konekcija uspesna!');
+        });
+
+        socket.on('counter', (data) => {
+            const parsedJson = JSON.parse(data);
+            
+            document.getElementById("in").innerHTML = parsedJson.in;
+            document.getElementById("out").innerHTML = parsedJson.out;
+            document.getElementById("diff").innerHTML = parsedJson.diff;
+        });
+
+    </script>
+</body>
+</html>
